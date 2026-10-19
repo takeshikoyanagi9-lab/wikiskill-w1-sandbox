@@ -1,0 +1,30 @@
+# W1 隔離検証用(takeshikoyanagi9-lab/wikiskill-w1-sandbox 専用・ダミーデータのみ)
+# 本番 allgroup-inc/hojo-hq の workflow を流用していない。secrets・外部アクション・追加権限を使わない。
+name: w1-sandbox-verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  nonroot:
+    name: "wikiskill-nonroot"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report event and confirm non-root user
+        run: |
+          echo "event=${GITHUB_EVENT_NAME} sha=${GITHUB_SHA}"
+          echo "uid=$(id -u)"
+          test "$(id -u)" -ne 0
+
+  gate:
+    name: "wikiskill-gate(PR は参考・信頼の根ではない)"
+    needs: nonroot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report gate result
+        run: echo "gate ok for sha=${GITHUB_SHA}"
